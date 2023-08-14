@@ -91,7 +91,7 @@ exports.createTutorProfile = async (req, res, next) => {
         // Recuperer les sessions de tutotat réservées par le tuteur
         const tutorSessions = await knex('tutoring_sessions')
   .where('tutor_id', tutorId)
-  .select('tutoring_sessions.id', 'subjects.name', 'tutoring_sessions.date', 'tutoring_sessions.start_time', 'tutoring_sessions.end_time', 'tutoring_sessions.location', 'tutoring_sessions.price')
+  .select('tutoring_sessions.id', 'subjects.name', 'subjects.description', 'tutoring_sessions.date', 'tutoring_sessions.start_time', 'tutoring_sessions.end_time', 'tutoring_sessions.location', 'tutoring_sessions.price')
   .leftJoin('subjects', 'tutoring_sessions.subject_id', 'subjects.id'); // Joindre table des matières  pour obtenir le nom. 
 
 
@@ -105,53 +105,70 @@ exports.createTutorProfile = async (req, res, next) => {
  }
 
 
- exports.deleteSession  = async (req, res, next) => {
-    const {id} = req.params; 
+//  exports.deleteSession  = async (req, res, next) => {
+//     const {id} = req.params; 
 
-    try {
-        // Verifier si la session existe dans la base de donnée
-        const session = await knex('tutoring_sessions').where('id', id).first(); 
-        if(!session) {
-            return res.status(400).json({error: 'Session de mentorat non existante'})
-        }
-        // supprimer la session de mentorat
-        await knex('tutoring_sessions').where('id', id).del()
-    }catch (error) {
-        return res.status(500).json({error: 'Erreur lors de la suppresion de la session de mentorat'})
+//     try {
+//         // Verifier si la session existe dans la base de donnée
+//         const session = await knex('tutoring_sessions').where('id', id).first(); 
+//         if(!session) {
+//             return res.status(400).json({error: 'Session de mentorat non existante'})
+//         }
+//         // supprimer la session de mentorat
+//         await knex('tutoring_sessions').where('id', id).del()
+//     }catch (error) {
+//         return res.status(500).json({error: 'Erreur lors de la suppresion de la session de mentorat'})
+//     }
+
+//  }
+
+exports.updateSession = async (req, res, next) => {
+  const sessionId = req.params.id;
+  const { date, start_time, end_time, location, price, description, subject_id, new_subject_name, new_subject_description } = req.body;
+
+  try {
+    // Vérifier si la session existe dans la base de données
+    const session = await knex('tutoring_sessions').where('id', sessionId).first();
+    if (!session) {
+      return res.status(400).json({ error: 'Session de tutorat non trouvée' });
     }
 
- }
+    // Vérifier les autorisations du tuteur
+    if (session.tutor_id !== req.user.id) {
+      return res.status(403).json({ error: 'Vous n"êtes pas autorisé à modifier cette session de tutorat' });
+    } 
 
- exports.updateSession = async (req, res) =>{
-    const {id} = req.params; 
-    const  {date, startTime, endTime, location, price} = req.body; 
+    // Mettre à jour les informations de la session
+    await knex('tutoring_sessions').where('id', sessionId).update({
+      date: date,
+      start_time: start_time,
+      end_time: end_time,
+      location: location,
+      price: price,
+      description: description,
+    });
 
-    try {
-        // verifier si la session de mentorat eiste dans la base de donnée
-        const session = await  knex('tutoring_sessions').where('id', id).first(); 
-        if(!session) {
-            return res.status(400).json({error: 'Session de tutorat non trouvé'}); 
-        }
-        // verifier si  l'utilisateur est un tuteur ou l'etudiant qui a reservé la session
-        if(session.tutor_id !== req.user.id && session.student_id !== req.user.id) {
-            return res.status(403).json({error: 'Vous n"êtes pas autorisé à modifier cette session de tutorat'});
-        }
-        // Mettre à jour le session 
-        const updatedSession = {
-            date :date,
-            startTime : startTime, 
-            endTime : endTime, 
-            location: location, 
-            price : price, 
-        }
+    // Si la session est liée à une matière
+    if (subject_id) {
+      // Récupérer les informations actuelles de la matière associée
+      const currentSubject = await knex('subjects').where('id', subject_id).first();
 
-        await knex('tutoring_sessions').where('id', id).first(); 
-
-        return res.json({message : 'Session de tutorat mise à jour avec succès', updatedSession});  
-        }catch(error) {
-        return res.status(500).json({error : 'Erreur lors de la mise à jour de la session'});
+      // Mettre à jour les informations de la matière associée
+      if (currentSubject) {
+        await knex('subjects').where('id', subject_id).update({
+          name: new_subject_name || currentSubject.name,
+          description: new_subject_description || currentSubject.description,
+        });
+      }
     }
- }
+
+    return res.json({ message: 'Session de tutorat mise à jour avec succès' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Erreur lors de la mise à jour de la session de tutorat' });
+  }
+};
+
+
 
  exports.createTutoringSession = async (req, res, next) => {
     const { tutor_id, subject_id, date, start_time, end_time, location, price } = req.body;
@@ -188,6 +205,27 @@ exports.createTutorProfile = async (req, res, next) => {
         console.error(error);
         return res.status(500).json({ error: 'Erreur lors de la création de la session de tutorat' });
     }
+}
+
+exports.deleteTutoringSession = async (req, res, next) => {
+  const sessionId = req.params.id;
+  console.log('sessionId:', sessionId);
+
+  try {
+
+    // verifier si la session existe dans la base de données
+    const session = await knex('tutoring_sessions').where('id', sessionId).first(); 
+    if (!session) {
+      return res.status(400).json({ error: 'Session de tutorat non trouvée' });
+    }
+    // supprimer la session de tutorat
+    await knex('tutoring_sessions').where('id', sessionId).del();
+      
+    return res.json({ message: 'Session de tutorat supprimée avec succès' });
+  }catch (error){
+    console.error(error);
+    return res.status(500).json({error: 'Erreur lors de la suppression de la session de tutorat'});
+  }
 }
 
 // Récupérer la liste des matières disponibles pour les tuteurs

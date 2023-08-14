@@ -11,10 +11,10 @@ const tutorOnly = require('../middleware/tutorOnly');
 router.get('/profile/:id', tutorCtrl.getOneProfile)
 router.get('/sessions',verifyToken, tutorCtrl.getTutorSessions)
 router.get('/subjects', tutorCtrl.getAvailableSubjects)
-router.delete('/sessions/:id', tutorCtrl.deleteSession)
+router.delete('/sessions/:id', tutorCtrl.deleteTutoringSession)
 router.put('/sessions/:id', verifyToken,tutorCtrl.updateSession)
 router.put('/profile/:id', verifyToken, tutorCtrl.updateTutorProfile)
 router.post('/profile/:id',multerUpload, tutorCtrl.createTutorProfile)
 router.post('/sessions',  tutorCtrl.createTutoringSession )
  
-module.exports = router;   
+module.exports = router;
