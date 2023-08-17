@@ -124,7 +124,9 @@ exports.createTutorProfile = async (req, res, next) => {
 
 exports.updateSession = async (req, res, next) => {
   const sessionId = req.params.id;
-  const { date, start_time, end_time, location, price, description, subject_id, new_subject_name, new_subject_description } = req.body;
+  const { date, start_time, end_time, location, price } = req.body;
+  console.log('sessionId:',sessionId);
+  console.log(req.body);
 
   try {
     // Vérifier si la session existe dans la base de données
@@ -145,25 +147,11 @@ exports.updateSession = async (req, res, next) => {
       end_time: end_time,
       location: location,
       price: price,
-      description: description,
     });
-
-    // Si la session est liée à une matière
-    if (subject_id) {
-      // Récupérer les informations actuelles de la matière associée
-      const currentSubject = await knex('subjects').where('id', subject_id).first();
-
-      // Mettre à jour les informations de la matière associée
-      if (currentSubject) {
-        await knex('subjects').where('id', subject_id).update({
-          name: new_subject_name || currentSubject.name,
-          description: new_subject_description || currentSubject.description,
-        });
-      }
-    }
 
     return res.json({ message: 'Session de tutorat mise à jour avec succès' });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: 'Erreur lors de la mise à jour de la session de tutorat' });
   }
 };

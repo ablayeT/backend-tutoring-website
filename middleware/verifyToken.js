@@ -7,7 +7,7 @@ const secretKey = process.env.TOKEN_SECRET_KEY
 
 module.exports = (req, res, next) => {
   const authorizationHeader = req.headers['authorization'];
-
+  console.log('autorisationHeader:',authorizationHeader);
   if (!authorizationHeader) {
     return res.status(403).json({ error: 'Token manquant. Vous devez être authentifié pour accéder à cette ressource.' });
   }
