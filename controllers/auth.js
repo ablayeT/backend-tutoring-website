@@ -85,24 +85,13 @@ const user = await knex('users').where('email', email).first();
     }
   }
 
-  exports.logout = (req, res, next) => {
-    // Vérifier si le token d'authentification est présent dans les en-têtes de la requête
-    const token = req.headers.authorization;
-  
-    if (!token) {
-      return res.status(401).json({ error: 'Token d\'authentification manquant' });
-    }
-  
-    try {
-      // Vérifier et décoder le token
-      const decodedToken = jwt.verify(token, 'votre_secret_key');
-    
-      revokedToken.push(decodedToken);
-      req.userData = { userId: decodedToken.userId };
-      next();
-    } catch (error) {
-      return res.status(401).json({ error: 'Token d\'authentification invalide' });
-    }
+  exports.logout = (req, res) => {
+    // Supprimez simplement le token du client (dans ce cas, du stockage local)
+    // Cela signifie que l'utilisateur est déconnecté
+    //  pas besoin de vérifier le token ici
+    //  pas nécessaire de renvoyer une réponse JSON, car le client ne se soucie généralement pas de la réponse de déconnexion
+    res.clearCookie('token'); // Supprimez le cookie s'il existe
+    res.status(200).send('Déconnexion réussie');
   };
   
   // Fonction pour réinitialiser le mot de passe 

@@ -24,10 +24,8 @@ exports.getOneProfile = async (req, res, next) => {
 
 exports.createTutorProfile = async (req, res, next) => {
     const { id } = req.params;
-    // console.log('id2:', id)
     const { skills, experience, hourly_rate, availability } = req.body;
-//   console.log('req.body:' , req.body)
-//   console.log(req.file)
+
     try {
       // Vérifier si l'utilisateur existe
       const user = await knex('users').where('id', id).first();
@@ -44,13 +42,11 @@ exports.createTutorProfile = async (req, res, next) => {
   
       // Créer le profil tuteur dans la table tutor_profiles
       const imageUrl = req.file.filename;
-    //   console.log('imsageUrl:', imageUrl)
-    //   console.log('req.file:', req.file)
+    
       await knex('tutor_profiles').insert({ user_id: id, imageUrl, skills, experience, hourly_rate, availability });
   
       return res.json({ message: 'Profil du tuteur créé avec succès' });
     } catch (error) {
-        // console.log('Erreur:',error);
       return res.status(500).json({ error: 'Une erreur est survenue lors de la création du profil du tuteur' });
     }
   };
@@ -77,7 +73,6 @@ exports.createTutorProfile = async (req, res, next) => {
   
       return res.json({ message: 'Profil du tuteur mis à jour avec succès' });
     } catch (error) {
-      console.error(error);
       return res.status(500).json({ error: 'Une erreur est survenue lors de la mise à jour du profil du tuteur' });
     }
   };
@@ -86,7 +81,6 @@ exports.createTutorProfile = async (req, res, next) => {
  exports.getTutorSessions = async (req, res,next)=> {
     try {
         const tutorId = req.user.id;
-        console.log('tutorId:',tutorId) 
 
         // Recuperer les sessions de tutotat réservées par le tuteur
         const tutorSessions = await knex('tutoring_sessions')
@@ -109,12 +103,12 @@ exports.createTutorProfile = async (req, res, next) => {
 //     const {id} = req.params; 
 
 //     try {
-//         // Verifier si la session existe dans la base de donnée
+        // Verifier si la session existe dans la base de donnée
 //         const session = await knex('tutoring_sessions').where('id', id).first(); 
 //         if(!session) {
 //             return res.status(400).json({error: 'Session de mentorat non existante'})
 //         }
-//         // supprimer la session de mentorat
+        // supprimer la session de mentorat
 //         await knex('tutoring_sessions').where('id', id).del()
 //     }catch (error) {
 //         return res.status(500).json({error: 'Erreur lors de la suppresion de la session de mentorat'})
@@ -125,8 +119,7 @@ exports.createTutorProfile = async (req, res, next) => {
 exports.updateSession = async (req, res, next) => {
   const sessionId = req.params.id;
   const { date, start_time, end_time, location, price } = req.body;
-  console.log('sessionId:',sessionId);
-  console.log(req.body);
+ 
 
   try {
     // Vérifier si la session existe dans la base de données
@@ -151,7 +144,7 @@ exports.updateSession = async (req, res, next) => {
 
     return res.json({ message: 'Session de tutorat mise à jour avec succès' });
   } catch (error) {
-    console.error(error);
+
     return res.status(500).json({ error: 'Erreur lors de la mise à jour de la session de tutorat' });
   }
 };
@@ -197,7 +190,6 @@ exports.updateSession = async (req, res, next) => {
 
 exports.deleteTutoringSession = async (req, res, next) => {
   const sessionId = req.params.id;
-  console.log('sessionId:', sessionId);
 
   try {
 
@@ -211,7 +203,6 @@ exports.deleteTutoringSession = async (req, res, next) => {
       
     return res.json({ message: 'Session de tutorat supprimée avec succès' });
   }catch (error){
-    console.error(error);
     return res.status(500).json({error: 'Erreur lors de la suppression de la session de tutorat'});
   }
 }
