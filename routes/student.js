@@ -11,7 +11,7 @@ router.get('/profile/:id', studentCtrl.getOneProfile)
 router.post('/rate-tutor/:tutorId', verifyToken,multerUpload, studentCtrl.rateCommentTutor); 
 router.post('/book-session', studentCtrl.bookSession);
 router.post('/profile/:id',multerUpload, studentCtrl.createStudentProfiles)
-// router.put('/profile/:',multerUpload, studentCtrl.updateProfile);
+router.put('/profile/:id', verifyToken,studentCtrl.updateStudentProfile);
 
 
 

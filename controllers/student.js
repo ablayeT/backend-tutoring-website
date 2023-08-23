@@ -55,6 +55,32 @@ exports.createStudentProfiles = async (req, res, next) => {
   }
 }
 
+exports.updateStudentProfile = async (req, res, next) => {
+  // Récupérer l'ID de l'utilisateur depuis le token
+  const userId = req.user.id;
+
+  // Récupérer les données du formulaire de mise à jour du profil
+  const { skills, experience, grade_level, major, university} = req.body;
+
+  try {
+    // Vérifier si le profil de l'utilisateur existe
+    const existingProfile = await knex('student_profiles').where('user_id', userId).first();
+    if (!existingProfile) {
+      return res.status(404).json({ error: "Le profil de l'utilisateur n'existe pas" });
+    }
+
+    // Mettre à jour les informations du profil
+    await knex('student_profiles')
+      .where('user_id', userId)
+      .update({ skills, experience, grade_level, major, university });
+
+    return res.json({ message: 'Profil du tuteur mis à jour avec succès' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Une erreur est survenue lors de la mise à jour du profil de l"étudiant' });
+  }
+};
+
+
 //Laisser une evaluation et un commentaire sur un tuteur en tant qu'étudiant 
 exports.rateCommentTutor = async (req, res, next) => {
     const {tutorId} = req.params; 
