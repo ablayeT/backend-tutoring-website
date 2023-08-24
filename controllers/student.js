@@ -26,7 +26,7 @@ exports.getOneProfile = async (req, res, next) => {
 
 exports.createStudentProfiles = async (req, res, next) => {
   const {id} = req.params; 
-  const { skills, experience, grade_level, major, university } = req.body; 
+  const { skills, experience, grade_level, major, school_name } = req.body; 
   console.log('req.body:', req.body);
   try {
     // verifier si l'utilisateur existe dans la base de donnée
@@ -45,7 +45,7 @@ exports.createStudentProfiles = async (req, res, next) => {
       //créer le profil etudiant dans la table student_profiles 
       const imageUrl = req.file.filename;
       console.log('imageUrl:', imageUrl);
-      await knex('student_profiles').insert({user_id:id, imageUrl, skills, experience, grade_level, major, university})
+      await knex('student_profiles').insert({user_id:id, imageUrl, skills, experience, grade_level, major, school_name})
       
       return res.json({message: 'Profil étudiant créé avec succès'});
 
@@ -60,7 +60,7 @@ exports.updateStudentProfile = async (req, res, next) => {
   const userId = req.user.id;
 
   // Récupérer les données du formulaire de mise à jour du profil
-  const { skills, experience, grade_level, major, university} = req.body;
+  const { skills, experience, grade_level, major, school_name} = req.body;
 
   try {
     // Vérifier si le profil de l'utilisateur existe
@@ -72,7 +72,7 @@ exports.updateStudentProfile = async (req, res, next) => {
     // Mettre à jour les informations du profil
     await knex('student_profiles')
       .where('user_id', userId)
-      .update({ skills, experience, grade_level, major, university });
+      .update({ skills, experience, grade_level, major, school_name });
 
     return res.json({ message: 'Profil du tuteur mis à jour avec succès' });
   } catch (error) {

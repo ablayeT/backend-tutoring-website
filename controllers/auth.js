@@ -11,7 +11,7 @@ const token_secret_key = process.env.TOKEN_SECRET_KEY
 
 
 exports.signup = async (req,res,next)=> {
-    const { full_name, email, password, user_type } = req.body; 
+    const { first_name,last_name, email, password, user_type } = req.body; 
     try {
       //verifier si l'utlisateur existe déja& dans la base de donnée 
       const userExist = await knex('users').where('email', email).first();
@@ -22,7 +22,7 @@ exports.signup = async (req,res,next)=> {
       const hashedPassword  = await bcrypt.hash(password, 10);
 
       // enregister le nouvel utilisateur dans la base de données
-      const newUser =  await knex('users').insert({full_name, email, password : hashedPassword, user_type});
+      const newUser =  await knex('users').insert({first_name,last_name, email, password : hashedPassword, user_type});
       res.status(201).json({message : 'Utilisateur enregistré avec succés', id: newUser[0]});
     } catch (error) {
       res.status(500).json({error: "Erreur lors de l'enregistrement de l'utilisateur"});

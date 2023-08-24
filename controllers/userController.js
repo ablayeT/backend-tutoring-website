@@ -33,7 +33,7 @@ exports.getOneProfile = async (req, res, next) => {
 
 exports.updateOneProfile = async (req, res, next) =>{
   const { id } = req.params
-  const { skills, experience, hourly_rate,availability, grade_level, major, university } = req.body;
+  const { skills, experience, hourly_rate,availability, grade_level, major, school_name } = req.body;
   // Définir une variable imageUrl vide
   let imageUrl;  
   // Verifier si e fichier a été telechargé et mettre à jour imageUrl en consequence
@@ -49,7 +49,7 @@ exports.updateOneProfile = async (req, res, next) =>{
     }
      // verifier le type d'utilisateur/ mettre à jour son profil
     if(user.user_type === 'student') {
-      await knex('student_profiles').where('user_id', id).update({imageUrl, skills, experience, grade_level, major, university })
+      await knex('student_profiles').where('user_id', id).update({imageUrl, skills, experience, grade_level, major, school_name })
     }else if(user.user_type === 'tutor') {
       await knex('tutor_profiles').where('user_id', id).update({imageUrl, skills, experience, hourly_rate, availability})
     }else {
