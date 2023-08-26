@@ -13,6 +13,7 @@ module.exports = (req, res, next) => {
   }
 
   const token = authorizationHeader.split(' ')[1];
+  
 
   jwt.verify(token, secretKey, (err, decoded) => {
     if (err) {
