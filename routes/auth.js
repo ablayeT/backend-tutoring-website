@@ -13,6 +13,8 @@ router.put('/change-password', verifyToken, userAuthCtrl.changePassword)
 //Route pour réinitialiser le mot de passe 
 router.post('/reset-password', userAuthCtrl.resetPassword)
 
+router.get('/current',verifyToken, userAuthCtrl.authCurrent )
+
 router.post('/logout', userAuthCtrl.logout)
 
 module.exports = router;

@@ -89,11 +89,11 @@ exports.createTutorProfile = async (req, res, next) => {
   .leftJoin('subjects', 'tutoring_sessions.subject_id', 'subjects.id'); // Joindre table des matières  pour obtenir le nom. 
 
 
-      console.log(tutorSessions);
+      // console.log(tutorSessions);
       return res.json({sessions : tutorSessions})
 
     }catch (error) {
-        console.log('Erreur:',error);
+        // console.log('Erreur:',error);
         return res.status(500).json({error: 'Erreur lors de la recuperation des sessions de tutora.'});
     }
  }
@@ -178,12 +178,12 @@ exports.updateSession = async (req, res, next) => {
             location: location, 
             price: price, 
         }
-        console.log('newSession:', newSession);
+        // console.log('newSession:', newSession);
 
         await knex('tutoring_sessions').insert(newSession); 
         return res.json({ message: 'Session de tutorat créée avec succès' }); 
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         return res.status(500).json({ error: 'Erreur lors de la création de la session de tutorat' });
     }
 }

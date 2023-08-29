@@ -2,14 +2,13 @@ const knex = require('knex')(require('../knexfile')['development']);
 
 // Rechercher des tuteurs en fonction des critères tels que la matière, le niveau d'enseignement, etc.  
 exports.searchTutors = async (req, res) => {
-  console.log('tutors');
   const { skills, experience, hourly_rate, availability } = req.query;
 
   try {
-    console.log('Skills:', skills);
-    console.log('Experience:', experience);
-    console.log('Hourly Rate:', hourly_rate);
-    console.log('Availability:', availability);
+    // console.log('Skills:', skills);
+    // console.log('Experience:', experience);
+    // console.log('Hourly Rate:', hourly_rate);
+    // console.log('Availability:', availability);
 
     // créer une requête de base pour récupérer les tuteurs
     let tutorsQuery = knex('users')
@@ -17,7 +16,7 @@ exports.searchTutors = async (req, res) => {
       .select('users.id', 'users.full_name', 'users.email', 'tutor_profiles.imageUrl', 'tutor_profiles.skills', 'tutor_profiles.experience', 'tutor_profiles.hourly_rate', 'tutor_profiles.availability');
 
     // filtrer les tuteurs en fonction des critères 
-    console.log(req.query); 
+    // console.log(req.query); 
     if (skills) {
       tutorsQuery = tutorsQuery.where('tutor_profiles.skills', 'like', `%${skills}%`);
     }
@@ -33,11 +32,11 @@ exports.searchTutors = async (req, res) => {
 
     // Exécuter la requête pour récupérer les tuteurs filtrés. 
     const tutors = await tutorsQuery;
-    console.log('Tutors:', tutors); // Vérifiez les résultats de la recherche des tuteurs
+    // console.log('Tutors:', tutors); // Vérifiez les résultats de la recherche des tuteurs
 
     res.json(tutors);
   } catch (error) {
-    console.error(error); // Affichez l'erreur exacte pour le débogage
+    // console.error(error); // Affichez l'erreur exacte pour le débogage
     return res.status(500).json({ error: 'Erreur lors de la recherche des tuteurs' });
   }
 }

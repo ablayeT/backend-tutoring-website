@@ -117,3 +117,8 @@ const user = await knex('users').where('email', email).first();
       return res.status(500).json({error : "Réinitialisation du mot de passe incorrecte"}); 
     }
   }
+
+  exports.authCurrent = async (req, res) => {
+    console.log('authCurrent')
+   return  res.json({isLoggedIn : true})
+}
