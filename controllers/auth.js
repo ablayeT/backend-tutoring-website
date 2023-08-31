@@ -119,6 +119,6 @@ const user = await knex('users').where('email', email).first();
   }
 
   exports.authCurrent = async (req, res) => {
-    console.log('authCurrent')
+   
    return  res.json({isLoggedIn : true})
 }
