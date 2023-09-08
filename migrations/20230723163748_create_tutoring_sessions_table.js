@@ -1,7 +1,3 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 exports.up = function (knex) {
   return knex.schema.createTable('tutoring_sessions', (table) => {
     table.increments('id').primary();
@@ -18,11 +14,3 @@ exports.up = function (knex) {
 exports.down = function (knex) {
   return knex.schema.dropTableIfExists('tutoring_sessions');
 };
-
-
-  
-
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */

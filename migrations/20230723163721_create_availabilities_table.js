@@ -1,7 +1,3 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
 exports.up = function (knex) {
   return knex.schema.createTable('availability', (table) => {
     table.increments('id').primary();
@@ -16,10 +12,3 @@ exports.up = function (knex) {
 exports.down = function (knex) {
   return knex.schema.dropTableIfExists('availability');
 };
-
-  
-
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
