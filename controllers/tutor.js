@@ -31,7 +31,6 @@ exports.createTutorProfile = async (req, res, next) => {
   try {
     // Vérifier si l'utilisateur existe
     const user = await knex('users').where('id', id).first();
-    //   console.log('utilisateur:',user)
     if (!user) {
       return res.status(400).json({ error: 'Utilisateur non trouvé' });
     }
@@ -118,10 +117,8 @@ exports.getTutorSessions = async (req, res, next) => {
       )
       .leftJoin('subjects', 'tutoring_sessions.subject_id', 'subjects.id'); // Joindre table des matières  pour obtenir le nom.
 
-    // console.log(tutorSessions);
     return res.json({ sessions: tutorSessions });
   } catch (error) {
-    // console.log('Erreur:',error);
     return res.status(500).json({
       error: 'Erreur lors de la recuperation des sessions de tutora.',
     });
@@ -185,7 +182,6 @@ exports.updateSession = async (req, res, next) => {
 exports.createTutoringSession = async (req, res, next) => {
   const { tutor_id, subject_id, date, start_time, end_time, location, price } =
     req.body;
-  // console.log('req.body:', req.body);
 
   try {
     // Vérifier si le tuteur existe dans la base de données
@@ -212,7 +208,6 @@ exports.createTutoringSession = async (req, res, next) => {
       location: location,
       price: price,
     };
-    // console.log('newSession:', newSession);
 
     await knex('tutoring_sessions').insert(newSession);
     return res.json({ message: 'Session de tutorat créée avec succès' });
@@ -265,7 +260,6 @@ exports.getAvailableSubjects = async (req, res, next) => {
 };
 
 exports.getAllSessions = async (req, res, next) => {
-  // console.log(res);
   try {
     const sessionsWithTutors = await knex
       .select(
@@ -273,6 +267,8 @@ exports.getAllSessions = async (req, res, next) => {
         'tutor_profiles.imageUrl',
         'users.first_name',
         'users.last_name',
+        'subjects.name as subject_name',
+        'subjects.description as subject_description',
       )
       .from('tutoring_sessions')
       .join(
@@ -280,12 +276,11 @@ exports.getAllSessions = async (req, res, next) => {
         'tutoring_sessions.tutor_id',
         'tutor_profiles.user_id',
       )
-      .join('users', 'tutoring_sessions.tutor_id', 'users.id');
-    // console.log(sessionsWithTutors);
-    // console.log(sessionsWithTutors);
+      .join('users', 'tutoring_sessions.tutor_id', 'users.id')
+      .join('subjects', 'tutoring_sessions.subject_id', 'subjects.id');
+
     res.json(sessionsWithTutors);
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       error:
         'Erreur lors de la recuperation des toutes les sessions de tutorat',

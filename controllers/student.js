@@ -16,22 +16,18 @@ exports.getOneProfile = async (req, res, next) => {
     return res.json(profile);
   } catch (error) {
     console.error('error :', error);
-    return res
-      .status(500)
-      .json({
-        error: 'Une erreur est survenue lors de la récupération du profil',
-      });
+    return res.status(500).json({
+      error: 'Une erreur est survenue lors de la récupération du profil',
+    });
   }
 };
 
 exports.createStudentProfiles = async (req, res, next) => {
   const { id } = req.params;
   const { skills, experience, grade_level, major, school_name } = req.body;
-  console.log('req.body:', req.body);
   try {
     // verifier si l'utilisateur existe dans la base de donnée
     const user = await knex('users').where('id', id).first();
-    console.log('user:', user);
     if (!user) {
       return res.status(400).json({ error: 'Utilisateur non trouvé' });
     }
@@ -48,7 +44,6 @@ exports.createStudentProfiles = async (req, res, next) => {
 
     //créer le profil etudiant dans la table student_profiles
     const imageUrl = req.file.filename;
-    console.log('imageUrl:', imageUrl);
     await knex('student_profiles').insert({
       user_id: id,
       imageUrl,
@@ -61,13 +56,10 @@ exports.createStudentProfiles = async (req, res, next) => {
 
     return res.json({ message: 'Profil étudiant créé avec succès' });
   } catch (error) {
-    console.log('error :', error);
-    return res
-      .status(500)
-      .json({
-        error:
-          'Une erreur est survenue lors de la création du profil de l"étuddiant',
-      });
+    return res.status(500).json({
+      error:
+        'Une erreur est survenue lors de la création du profil de l"étuddiant',
+    });
   }
 };
 
@@ -96,12 +88,10 @@ exports.updateStudentProfile = async (req, res, next) => {
 
     return res.json({ message: 'Profil du tuteur mis à jour avec succès' });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error:
-          'Une erreur est survenue lors de la mise à jour du profil de l"étudiant',
-      });
+    return res.status(500).json({
+      error:
+        'Une erreur est survenue lors de la mise à jour du profil de l"étudiant',
+    });
   }
 };
 
@@ -119,11 +109,9 @@ exports.rateCommentTutor = async (req, res, next) => {
     // verifier si l'utisateur qui laisse l'evaluation est un étudiant
     const student = await knex('users').where({ id: req.user.id }).first();
     if (!student || student.user_type !== 'student') {
-      return res
-        .status(400)
-        .json({
-          error: 'Vous devez être un étudiant pour laisser une évaluaition',
-        });
+      return res.status(400).json({
+        error: 'Vous devez être un étudiant pour laisser une évaluaition',
+      });
     }
     //Inserer l'valuation dans la table des evaluations et commentaire
     const ratingCommentData = {
@@ -139,97 +127,104 @@ exports.rateCommentTutor = async (req, res, next) => {
       message: 'Evaluation et commentaire ajouté avec succès',
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: "Erreur lors de la soumission de l'évaluation et commentaire",
-      });
+    return res.status(500).json({
+      error: "Erreur lors de la soumission de l'évaluation et commentaire",
+    });
   }
 };
 
 // Reserver une session de tutorat
 exports.bookSession = async (req, res, next) => {
-  const { tutorId, date, startTime, endTime } = req.body;
-  const studentId = req.user.id; // recuperer l'id de l'étudiant à partir du token d'identificaion
   try {
-    // vérifier si le tuteur existe dans la base de donnée
-    const tutor = await knex('users')
-      .where({ id: tutorId, user_type: 'tutor' })
-      .first();
-    if (!tutor) {
-      return res.status(400).json({ error: 'Tutor non existant' });
-    }
+    const {
+      student_id,
+      tutoring_session_id,
+      date,
+      start_time,
+      end_time,
+      subject,
+      price,
+      status,
+    } = req.body;
 
-    // Vérifier si l'étudiant existe dans la base de donnée
-    const student = await knex('users')
-      .where({ id: studentId, user_type: 'student' })
-      .first();
-    if (!student) {
-      return res.status(400).json({ error: 'Etudiant non existant' });
-    }
-
-    // Inserrer la sesssion de tutorat dans la base de donnée.
-    const sessionData = {
-      tutor_id: tutorId,
-      student_id: studentId,
-      date: date,
-      start_time: startTime,
-      end_time: endTime,
-      location: location,
-      price: parseFloat(price),
-      status: 'pending',
-    };
-
-    const sessionId = await knex('tutoring_sessions').insert(sessionData);
-
-    return res.json({
-      message: 'Session de turorat resservée avec succès',
-      session_id: sessionId[0],
+    // Insérez les données dans la table 'student_sessions'
+    const result = await knex('student_sessions').insert({
+      student_id,
+      tutoring_session_id,
+      date,
+      start_time,
+      end_time,
+      subject,
+      price,
+      status,
     });
+
+    if (result) {
+      res.status(201).json({ message: 'Session réservée avec succès' });
+    } else {
+      res.status(500).json({ error: 'Échec de la réservation de session' });
+    }
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: 'Erreur lors de la réservaiton de la session de tutorat',
-      });
+    console.error(error);
+    res.status(500).json({ error: 'Erreur lors de la réservation de session' });
   }
 };
 
 // Récuperer les sessions de tutorat réservées par un étudiant
+// exports.getStudentSessions = async (req, res, next) => {
+// const studentId = req.user.id; // Récupérer l'ID de l'étudiant à partir du toke d'identification
+
+//   try {
+// verifier si l'étudiant existe dans la base de donnée.
+//     const student = await knex('users')
+//       .where({ id: 'id', user_type: 'student' })
+//       .first();
+//     if (!student) {
+//       return res.status(400).json({ error: 'Etudiant non existant' });
+//     }
+
+// Récuperer les sessions de tutorat réservées par l'étudiant
+//     const sessions = await knex('tutoring_sessions')
+//       .where('id', id)
+//       .select(
+//         'id',
+//         'tutor_id',
+//         'subject_id',
+//         'date',
+//         'start_time',
+//         'end_time',
+//         'location',
+//         'price',
+//         'status',
+//       );
+
+//     return res.json({ sessions });
+//   } catch (error) {
+//     return res.status(400).json({
+//       error:
+//         "Erreur lors de la recuperation des sessions de tutorat de l'étudiant",
+//     });
+//   }
+// };
+
+// récupérer les sessions réservées par l'étudiant
 exports.getStudentSessions = async (req, res, next) => {
-  // const studentId = req.user.id; // Récupérer l'ID de l'étudiant à partir du toke d'identification
+  const studentId = req.user.id;
 
   try {
-    // verifier si l'étudiant existe dans la base de donnée.
-    const student = await knex('users')
-      .where({ id: 'id', user_type: 'student' })
-      .first();
-    if (!student) {
-      return res.status(400).json({ error: 'Etudiant non existant' });
-    }
+    //  récupérer les sessions réservées par l'étudiant
+    const studentSessions = await knex('student_sessions')
+      .select()
+      .where('student_id', studentId);
 
-    // Récuperer les sessions de tutorat réservées par l'étudiant
-    const sessions = await knex('tutoring_sessions')
-      .where('id', id)
-      .select(
-        'id',
-        'tutor_id',
-        'subject_id',
-        'date',
-        'start_time',
-        'end_time',
-        'location',
-        'price',
-        'status',
-      );
-
-    return res.json({ sessions });
+    res.json(studentSessions);
   } catch (error) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "Erreur lors de la recuperation des sessions de tutorat de l'étudiant",
-      });
+    console.error(
+      'Erreur lors de la récupération des sessions réservées :',
+      error,
+    );
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des sessions réservées' });
   }
 };

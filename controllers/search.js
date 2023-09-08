@@ -5,11 +5,6 @@ exports.searchTutors = async (req, res) => {
   const { skills, experience, hourly_rate, availability } = req.query;
 
   try {
-    // console.log('Skills:', skills);
-    // console.log('Experience:', experience);
-    // console.log('Hourly Rate:', hourly_rate);
-    // console.log('Availability:', availability);
-
     // créer une requête de base pour récupérer les tuteurs
     let tutorsQuery = knex('users')
       .join('tutor_profiles', 'users.id', '=', 'tutor_profiles.user_id')
@@ -25,7 +20,7 @@ exports.searchTutors = async (req, res) => {
       );
 
     // filtrer les tuteurs en fonction des critères
-    // console.log(req.query);
+
     if (skills) {
       tutorsQuery = tutorsQuery.where(
         'tutor_profiles.skills',
@@ -57,7 +52,6 @@ exports.searchTutors = async (req, res) => {
 
     // Exécuter la requête pour récupérer les tuteurs filtrés.
     const tutors = await tutorsQuery;
-    // console.log('Tutors:', tutors); // Vérifiez les résultats de la recherche des tuteurs
 
     res.json(tutors);
   } catch (error) {
@@ -129,10 +123,8 @@ exports.searchStudents = async (req, res, next) => {
 
     return res.json(students);
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: 'Une erreur est survenue lors de la recherche des étudiants',
-      });
+    return res.status(500).json({
+      error: 'Une erreur est survenue lors de la recherche des étudiants',
+    });
   }
 };
