@@ -13,7 +13,9 @@ router.post(
   multerUpload,
   studentCtrl.rateCommentTutor,
 );
+
 router.post('/book-session', studentCtrl.bookSession);
+router.post('/cancel-session', studentCtrl.cancelSession);
 router.post('/profile/:id', multerUpload, studentCtrl.createStudentProfiles);
 router.put('/profile/:id', verifyToken, studentCtrl.updateStudentProfile);
 

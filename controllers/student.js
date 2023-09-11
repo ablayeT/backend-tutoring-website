@@ -170,52 +170,34 @@ exports.bookSession = async (req, res, next) => {
   }
 };
 
-// Récuperer les sessions de tutorat réservées par un étudiant
-// exports.getStudentSessions = async (req, res, next) => {
-// const studentId = req.user.id; // Récupérer l'ID de l'étudiant à partir du toke d'identification
-
-//   try {
-// verifier si l'étudiant existe dans la base de donnée.
-//     const student = await knex('users')
-//       .where({ id: 'id', user_type: 'student' })
-//       .first();
-//     if (!student) {
-//       return res.status(400).json({ error: 'Etudiant non existant' });
-//     }
-
-// Récuperer les sessions de tutorat réservées par l'étudiant
-//     const sessions = await knex('tutoring_sessions')
-//       .where('id', id)
-//       .select(
-//         'id',
-//         'tutor_id',
-//         'subject_id',
-//         'date',
-//         'start_time',
-//         'end_time',
-//         'location',
-//         'price',
-//         'status',
-//       );
-
-//     return res.json({ sessions });
-//   } catch (error) {
-//     return res.status(400).json({
-//       error:
-//         "Erreur lors de la recuperation des sessions de tutorat de l'étudiant",
-//     });
-//   }
-// };
-
 // récupérer les sessions réservées par l'étudiant
 exports.getStudentSessions = async (req, res, next) => {
   const studentId = req.user.id;
 
   try {
-    //  récupérer les sessions réservées par l'étudiant
+    // Récupérer les sessions réservées par l'étudiant avec les informations du tuteur
     const studentSessions = await knex('student_sessions')
-      .select()
-      .where('student_id', studentId);
+      .select(
+        'student_sessions.*',
+        'users.first_name as first_name',
+        'users.last_name as last_name',
+        'tutor_profiles.imageUrl as imageUrl',
+        'subjects.name as subject_name',
+        'subjects.description as subject_description',
+      )
+      .where('student_id', studentId)
+      .join(
+        'tutoring_sessions',
+        'student_sessions.tutoring_session_id',
+        'tutoring_sessions.id',
+      )
+      .join('users', 'tutoring_sessions.tutor_id', 'users.id')
+      .join(
+        'tutor_profiles',
+        'tutoring_sessions.tutor_id',
+        'tutor_profiles.user_id',
+      )
+      .join('subjects', 'tutoring_sessions.subject_id', 'subject_id');
 
     res.json(studentSessions);
   } catch (error) {
@@ -223,8 +205,48 @@ exports.getStudentSessions = async (req, res, next) => {
       'Erreur lors de la récupération des sessions réservées :',
       error,
     );
-    res
-      .status(500)
-      .json({ error: 'Erreur lors de la récupération des sessions réservées' });
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des sessions réservées',
+    });
   }
+};
+
+exports.cancelSession = async (req, res, next) => {
+  try {
+    // Récuperatin de l'id de la session de puis le corps de la requête
+    const sessionId = req.body.sessionId;
+    console.log(sessionId);
+
+    // Vérifier si la session existe dans la base de données
+    const session = await knex('student_sessions')
+      .where('id', sessionId)
+      .first();
+
+    if (!session) {
+      return res.status(404).json({ error: 'session introuvable' });
+    }
+
+    // Verifie si la session est déjà annulée
+    if (session.status === 'canceled') {
+      return res.status(400).json({ error: 'La session est déjà annulée' });
+    }
+
+    //Metttre à jour la base de donnée pour marquer la session comme annulée :'canceled
+
+    await knex('student_sessions')
+      .where('id', sessionId)
+      .update({ status: 'canceled' });
+
+    await knex('tutoring_sessions')
+      .where('id', session.tutoring_session_id)
+      .update({ status: 'canceled' });
+
+    // réponse en cas de succès
+    return res.status(200).json({ message: 'Session annulée avec succès' });
+  } catch (error) {
+    console.error("Erreur lors de l'annulation de la session : ", error);
+  }
+  return res
+    .status(500)
+    .json({ error: "Erreur lors de l'annulation de la sessionn" });
 };
