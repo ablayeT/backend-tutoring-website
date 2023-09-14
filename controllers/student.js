@@ -146,7 +146,6 @@ exports.bookSession = async (req, res, next) => {
       price,
       status,
     } = req.body;
-
     // Insérez les données dans la table 'student_sessions'
     const result = await knex('student_sessions').insert({
       student_id,
@@ -160,7 +159,13 @@ exports.bookSession = async (req, res, next) => {
     });
 
     if (result) {
-      res.status(201).json({ message: 'Session réservée avec succès' });
+      const reservedSession = await knex('student_sessions')
+        .where('id', result[0]) // result[0] contient l'ID de la session réservée
+        .first();
+      res.status(201).json({
+        message: 'Session réservée avec succès',
+        session: reservedSession,
+      });
     } else {
       res.status(500).json({ error: 'Échec de la réservation de session' });
     }
@@ -173,7 +178,6 @@ exports.bookSession = async (req, res, next) => {
 // récupérer les sessions réservées par l'étudiant
 exports.getStudentSessions = async (req, res, next) => {
   const studentId = req.user.id;
-
   try {
     // Récupérer les sessions réservées par l'étudiant avec les informations du tuteur
     const studentSessions = await knex('student_sessions')
@@ -197,7 +201,8 @@ exports.getStudentSessions = async (req, res, next) => {
         'tutoring_sessions.tutor_id',
         'tutor_profiles.user_id',
       )
-      .join('subjects', 'tutoring_sessions.subject_id', 'subject_id');
+      .join('subjects', 'tutoring_sessions.subject_id', 'subject_id')
+      .groupByRaw('student_sessions.tutoring_session_id');
 
     res.json(studentSessions);
   } catch (error) {
@@ -215,7 +220,6 @@ exports.cancelSession = async (req, res, next) => {
   try {
     // Récuperatin de l'id de la session de puis le corps de la requête
     const sessionId = req.body.sessionId;
-    console.log(sessionId);
 
     // Vérifier si la session existe dans la base de données
     const session = await knex('student_sessions')
@@ -233,13 +237,11 @@ exports.cancelSession = async (req, res, next) => {
 
     //Metttre à jour la base de donnée pour marquer la session comme annulée :'canceled
 
-    await knex('student_sessions')
-      .where('id', sessionId)
-      .update({ status: 'canceled' });
+    await knex('student_sessions').where('id', sessionId).delete();
 
-    await knex('tutoring_sessions')
-      .where('id', session.tutoring_session_id)
-      .update({ status: 'canceled' });
+    // await knex('tutoring_sessions')
+    //   .where('id', session.tutoring_session_id)
+    //   .update({ status: 'canceled' });
 
     // réponse en cas de succès
     return res.status(200).json({ message: 'Session annulée avec succès' });
