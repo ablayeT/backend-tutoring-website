@@ -98,7 +98,7 @@ exports.updateTutorProfile = async (req, res, next) => {
   }
 };
 
-exports.getTutorSessions = async (req, res, next) => {
+exports.getAllSessionsWithStudents = async (req, res, next) => {
   try {
     const tutorId = req.user.id;
 
@@ -117,13 +117,68 @@ exports.getTutorSessions = async (req, res, next) => {
       )
       .leftJoin('subjects', 'tutoring_sessions.subject_id', 'subjects.id'); // Joindre table des matières  pour obtenir le nom.
 
-    return res.json({ sessions: tutorSessions });
+    // Pour chaque session, récupérez la liste des étudiants qui ont réservé
+    const sessionsWithStudents = await Promise.all(
+      tutorSessions.map(async (session) => {
+        const students = await knex('student_sessions')
+          .select('users.first_name', 'users.last_name')
+          .join('users', 'student_sessions.student_id', 'users.id')
+          .where('student_sessions.tutoring_session_id', session.id);
+
+        return { ...session, students };
+      }),
+    );
+
+    return res.json({ sessions: sessionsWithStudents });
   } catch (error) {
     return res.status(500).json({
       error: 'Erreur lors de la recuperation des sessions de tutora.',
     });
   }
 };
+
+// exports.getAllSessionsWithStudents = async (req, res, next) => {
+//   try {
+//     const tutorId = req.user.id;
+
+//     const sessionsWithTutors = await knex
+//       .select(
+//         'tutoring_sessions.*',
+//         'tutor_profiles.imageUrl',
+//         'users.first_name as tutor_first_name',
+//         'users.last_name as tutor_last_name',
+//         'subjects.name as subject_name',
+//         'subjects.description as subject_description',
+//       )
+//       .from('tutoring_sessions')
+//       .join(
+//         'tutor_profiles',
+//         'tutoring_sessions.tutor_id',
+//         'tutor_profiles.user_id',
+//       )
+//       .join('users', 'tutoring_sessions.tutor_id', 'users.id')
+//       .join('subjects', 'tutoring_sessions.subject_id', 'subjects.id')
+//       .join('tutoring_sessions.tutor_id', tutorId);
+
+//     const sessionswithStudents = await Promise.all(
+//       sessionsWithTutors.map(async (session) => {
+//         const students = await knex('student_sessions')
+//           .select('users.first_name', 'users.last_name')
+//           .join('users', 'student_sessions.student_id', 'users.id')
+//           .where('student_sessions.tutoring_session_id', session.id);
+
+//         return { ...session, students };
+//       }),
+//     );
+
+//     res.json(sessionsWithTutors);
+//   } catch (error) {
+//     return res.status(500).json({
+//       error:
+//         'Erreur lors de la recuperation des toutes les sessions de tutorat',
+//     });
+//   }
+// };
 
 //  exports.deleteSession  = async (req, res, next) => {
 //     const {id} = req.params;

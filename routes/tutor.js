@@ -14,7 +14,7 @@ router.get(
   verifyToken,
   tutorsOnly,
   verifyToken,
-  tutorCtrl.getTutorSessions,
+  tutorCtrl.getAllSessionsWithStudents,
 );
 router.get('/allSessions', verifyToken, studentsOnly, tutorCtrl.getAllSessions);
 router.get(
