@@ -220,6 +220,7 @@ exports.cancelSession = async (req, res, next) => {
   try {
     // Récuperatin de l'id de la session de puis le corps de la requête
     const sessionId = req.body.sessionId;
+    console.log(req.body);
 
     // Vérifier si la session existe dans la base de données
     const session = await knex('student_sessions')
@@ -239,6 +240,7 @@ exports.cancelSession = async (req, res, next) => {
 
     await knex('student_sessions').where('id', sessionId).delete();
 
+    // Supprimer la session de la table tutoring_sessions (si nécessaire)
     // await knex('tutoring_sessions')
     //   .where('id', session.tutoring_session_id)
     //   .update({ status: 'canceled' });

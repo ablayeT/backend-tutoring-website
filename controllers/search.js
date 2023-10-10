@@ -128,3 +128,36 @@ exports.searchStudents = async (req, res, next) => {
     });
   }
 };
+
+exports.searchSessions = async (req, res) => {
+  console.log('seachSessions');
+  const { query } = req.params;
+
+  try {
+    knexQuery = knex('tutoring_sessions').select(
+      'tutoring_sessions.id',
+      'tutoring_sessions.date',
+      'tutoring_sessions.start_time',
+      'tutoring_sessions.end_time',
+      'tutoring_sessions.location',
+      'tutoring_sessions.price',
+      'tutoring_sessions.status',
+      // Ajoutez d'autres colonnes nécessaires ici
+    );
+
+    if (query) {
+      knexQuery = knexQuery
+        .where('location', 'like', `%${query}%`)
+        .orWhere('subjectName', 'like', `%${query}%`)
+        .orWhere('tutorName', 'like', `%${query}%`);
+    }
+
+    const sessions = await knexQuery;
+    console.log('sessions :', sessions);
+
+    res.json({ sessions });
+  } catch (error) {
+    console.log('Erreur lors de la recherche :', error);
+    res.status(500).json({ error: 'Erreur lors de la recherche.' });
+  }
+};

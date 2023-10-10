@@ -101,7 +101,7 @@ exports.updateTutorProfile = async (req, res, next) => {
 exports.getAllSessionsWithStudents = async (req, res, next) => {
   try {
     const tutorId = req.user.id;
-    console.log('tutorId :', tutorId);
+    // console.log('tutorId :', tutorId);
 
     // Recuperer les sessions de tutotat réservées par le tuteur
     const tutorSessions = await knex('tutoring_sessions')
@@ -118,22 +118,28 @@ exports.getAllSessionsWithStudents = async (req, res, next) => {
       )
       .leftJoin('subjects', 'tutoring_sessions.subject_id', 'subjects.id'); // Joindre table des matières  pour obtenir le nom.
 
-    console.log('tutoring_sessions :', tutorSessions);
+    // console.log('tutoring_sessions :', tutorSessions);
     // Pour chaque session, récupérez la liste des étudiants qui ont réservé
     const sessionsWithStudents = await Promise.all(
       tutorSessions.map(async (session) => {
         const students = await knex('student_sessions')
           .select('users.first_name', 'users.last_name')
+          .select('student_profiles.imageUrl')
           .join('users', 'student_sessions.student_id', 'users.id')
+          .leftJoin(
+            'student_profiles',
+            'student_sessions.student_id',
+            'student_profiles.user_id',
+          )
           .where('student_sessions.tutoring_session_id', session.id);
 
         return { ...session, students };
       }),
     );
-    console.log('sessionWithStudents :', sessionsWithStudents);
+    // console.log('sessionWithStudents :', sessionsWithStudents);
     return res.json({ sessions: sessionsWithStudents });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(500).json({
       error: 'Erreur lors de la recuperation des sessions de tutora.',
     });
