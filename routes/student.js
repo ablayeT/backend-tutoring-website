@@ -26,11 +26,17 @@ router.post(
   studentsOnly,
   studentCtrl.bookSession,
 );
+// router.post(
+//   '/cancel-session',
+//   verifyToken,
+//   studentsOnly,
+//   studentCtrl.cancelSession,
+// );
 router.post(
-  '/cancel-session',
+  '/cancel-reserved-session',
   verifyToken,
   studentsOnly,
-  studentCtrl.cancelSession,
+  studentCtrl.cancelReservedSession,
 );
 router.post(
   '/profile/:id',
