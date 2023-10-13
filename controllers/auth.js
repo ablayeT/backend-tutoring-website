@@ -61,7 +61,13 @@ exports.login = async (req, res, next) => {
 
     // Gérer un jeton d'authenisafication (JWT) pour l'utilisteur
     const token = jwt.sign(
-      { id: user.id, user_type: user.user_type, email: user.email },
+      {
+        id: user.id,
+        user_type: user.user_type,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+      },
       token_secret_key,
       { expiresIn: '24h' },
     );
@@ -70,6 +76,8 @@ exports.login = async (req, res, next) => {
       message: 'Connexion réussie',
       userId: user.id,
       userType: user.user_type,
+      userFirstName: user.first_name,
+      userLastName: user.last_name,
       token,
     });
   } catch (error) {
