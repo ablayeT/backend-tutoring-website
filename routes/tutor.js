@@ -42,6 +42,7 @@ router.put(
   tutorsOnly,
   tutorCtrl.updateTutorProfile,
 );
+router.put('/session/ChangeStatus', verifyToken, tutorCtrl.updateSessionStatus);
 router.post(
   '/profile/:id',
   verifyToken,
