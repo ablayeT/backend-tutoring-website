@@ -6,11 +6,9 @@ exports.getAllContacts = async (req, res, next) => {
     const contacts = await knex('contacts').select('*');
     res.json(contacts);
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: 'Une erreur est survenue lors de la récupération des contacts',
-      });
+    return res.status(500).json({
+      error: 'Une erreur est survenue lors de la récupération des contacts',
+    });
   }
 };
 
@@ -23,10 +21,8 @@ exports.createContact = async (req, res) => {
       contact_id: newContact[0],
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: 'Une erreur est survenue lors de la création du contact.',
-      });
+    return res.status(500).json({
+      error: 'Une erreur est survenue lors de la création du contact.',
+    });
   }
 };

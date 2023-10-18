@@ -23,6 +23,12 @@ router.get(
   //   tutorsOnly,
   tutorCtrl.getAvailableSubjects,
 );
+router.get(
+  '/sessions/:id/students',
+  verifyToken,
+  tutorsOnly,
+  tutorCtrl.getStudentsBySessionId,
+);
 router.delete(
   '/sessions/:id',
   verifyToken,

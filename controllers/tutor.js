@@ -2,6 +2,8 @@ const express = require('express');
 const knex = require('knex')(require('../knexfile')['development']);
 // const multerUpload = require('../middleware/multer.config');
 
+const Session = require('../models/session');
+
 const app = express();
 app.use(express.json());
 
@@ -146,6 +148,28 @@ exports.getAllSessionsWithStudents = async (req, res, next) => {
   }
 };
 
+exports.updateSessionStatus = async (req, res, next) => {
+  const { sessionId } = req.params;
+  const { status } = req.body;
+
+  try {
+    // Mettreà jour le statut de la session dans la base de données
+    await knex('tutoring_sessions').where({ id: sessionId }).update({ status });
+
+    res
+      .status(200)
+      .json({ message: 'Statut de la session mis à jour avec succès' });
+  } catch (error) {
+    console.error(
+      'Erreur lors de la mise à jour du statut de la session :',
+      error,
+    );
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la mise à jour du statut de la session' });
+  }
+};
+
 // exports.getAllSessionsWithStudents = async (req, res, next) => {
 //   try {
 //     const tutorId = req.user.id;
@@ -246,12 +270,14 @@ exports.updateSession = async (req, res, next) => {
 exports.createTutoringSession = async (req, res, next) => {
   const { tutor_id, subject_id, date, start_time, end_time, location, price } =
     req.body;
-
+  console.log('req.body:', req.body);
   try {
     // Vérifier si le tuteur existe dans la base de données
     const tutor = await knex('users')
       .where({ id: tutor_id, user_type: 'Tutor' })
       .first();
+    console.log('tutor : ', tutor);
+
     if (!tutor) {
       return res.status(400).json({ error: 'Tuteur non existant' });
     }
@@ -261,9 +287,9 @@ exports.createTutoringSession = async (req, res, next) => {
     if (!subject) {
       return res.status(400).json({ error: 'Matière non existante' });
     }
-
+    console.log('subject :', subject);
     // Créer la nouvelle session de tutorat dans la table tutoring_sessions
-    const newSession = {
+    const sessionData = {
       tutor_id: tutor_id,
       subject_id: subject_id,
       date: date,
@@ -272,11 +298,16 @@ exports.createTutoringSession = async (req, res, next) => {
       location: location,
       price: price,
     };
+    // Créer la session en utilisant le modèle Session
+    const newSession = await Session.create(sessionData);
+    console.log('newSession: ', newSession);
 
-    await knex('tutoring_sessions').insert(newSession);
-    return res.json({ message: 'Session de tutorat créée avec succès' });
+    return res.status(201).json({
+      message: 'Session de tutorat créée avec succès',
+      session: newSession,
+    });
   } catch (error) {
-    // console.error(error);
+    console.error(error);
     return res
       .status(500)
       .json({ error: 'Erreur lors de la création de la session de tutorat' });
@@ -291,9 +322,11 @@ exports.deleteTutoringSession = async (req, res, next) => {
     const session = await knex('tutoring_sessions')
       .where('id', sessionId)
       .first();
+
     if (!session) {
       return res.status(400).json({ error: 'Session de tutorat non trouvée' });
     }
+
     // supprimer la session de tutorat
     await knex('tutoring_sessions').where('id', sessionId).del();
 
@@ -319,6 +352,27 @@ exports.getAvailableSubjects = async (req, res, next) => {
   } catch (error) {
     return res.status(500).json({
       error: 'Erreur lors de la recuperation des matières disponible ',
+    });
+  }
+};
+
+exports.getStudentsBySessionId = async (req, res, next) => {
+  const sessionId = req.params.id;
+
+  try {
+    // Récupérer les étudiants inscrits à la session spécifique en fonction de l'ID de la session
+    const students = await knex('student_sessions')
+      .where('tutoring_session_id', sessionId)
+      .join('users', 'users.id', 'student_sessions.student_id')
+      .select('users.*')
+      .where('users.user_type', 'Student'); // Filtrer uniquement les étudiants
+
+    return res.json(students);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      error:
+        'Erreur lors de la récupération des étudiants inscrits à cette session',
     });
   }
 };

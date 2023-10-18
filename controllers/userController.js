@@ -58,16 +58,14 @@ exports.updateOneProfile = async (req, res, next) => {
     }
     // verifier le type d'utilisateur/ mettre à jour son profil
     if (user.user_type === 'student') {
-      await knex('student_profiles')
-        .where('user_id', id)
-        .update({
-          imageUrl,
-          skills,
-          experience,
-          grade_level,
-          major,
-          school_name,
-        });
+      await knex('student_profiles').where('user_id', id).update({
+        imageUrl,
+        skills,
+        experience,
+        grade_level,
+        major,
+        school_name,
+      });
     } else if (user.user_type === 'tutor') {
       await knex('tutor_profiles')
         .where('user_id', id)
@@ -78,11 +76,9 @@ exports.updateOneProfile = async (req, res, next) => {
 
     return res.json({ message: 'Profil mise à jour avec succcès' });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: 'Une erreur est survenue lors de la mise à jour du profil.',
-      });
+    return res.status(500).json({
+      error: 'Une erreur est survenue lors de la mise à jour du profil.',
+    });
   }
 };
 
@@ -109,11 +105,9 @@ exports.deleteProfile = async (req, res, next) => {
 
     return res.json({ message: 'Profil supprimé avec succés' });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: 'Une erreur est survenue lors de la suppression du profil',
-      });
+    return res.status(500).json({
+      error: 'Une erreur est survenue lors de la suppression du profil',
+    });
   }
 };
 
@@ -152,11 +146,9 @@ exports.getProfiles = async (req, res, next) => {
 
     return res.json({ profiles });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: 'Une erreur est survenue lors de la recuperation des profils',
-      });
+    return res.status(500).json({
+      error: 'Une erreur est survenue lors de la recuperation des profils',
+    });
   }
 };
 
