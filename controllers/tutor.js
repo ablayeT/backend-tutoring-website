@@ -19,7 +19,6 @@ exports.getOneProfile = async (req, res, next) => {
 
     return res.json({ profile });
   } catch (error) {
-    console.error('Error lors de la récupération du profil du tuteur:', error);
     res
       .status(500)
       .json({ message: 'Error lors de la récupération du profil du tuteur.' });
@@ -103,7 +102,6 @@ exports.updateTutorProfile = async (req, res, next) => {
 exports.getAllSessionsWithStudents = async (req, res, next) => {
   try {
     const tutorId = req.user.id;
-    // console.log('tutorId :', tutorId);
 
     // Recuperer les sessions de tutotat réservées par le tuteur
     const tutorSessions = await knex('tutoring_sessions')
@@ -120,8 +118,7 @@ exports.getAllSessionsWithStudents = async (req, res, next) => {
       )
       .leftJoin('subjects', 'tutoring_sessions.subject_id', 'subjects.id'); // Joindre table des matières  pour obtenir le nom.
 
-    // console.log('tutoring_sessions :', tutorSessions);
-    // Pour chaque session, récupérez la liste des étudiants qui ont réservé
+    // Pour chaque session, récupérer la liste des étudiants qui ont réservé
     const sessionsWithStudents = await Promise.all(
       tutorSessions.map(async (session) => {
         const students = await knex('student_sessions')
@@ -138,10 +135,8 @@ exports.getAllSessionsWithStudents = async (req, res, next) => {
         return { ...session, students };
       }),
     );
-    // console.log('sessionWithStudents :', sessionsWithStudents);
     return res.json({ sessions: sessionsWithStudents });
   } catch (error) {
-    // console.log(error);
     return res.status(500).json({
       error: 'Erreur lors de la recuperation des sessions de tutora.',
     });
@@ -270,13 +265,11 @@ exports.updateSession = async (req, res, next) => {
 exports.createTutoringSession = async (req, res, next) => {
   const { tutor_id, subject_id, date, start_time, end_time, location, price } =
     req.body;
-  console.log('req.body:', req.body);
   try {
     // Vérifier si le tuteur existe dans la base de données
     const tutor = await knex('users')
       .where({ id: tutor_id, user_type: 'Tutor' })
       .first();
-    console.log('tutor : ', tutor);
 
     if (!tutor) {
       return res.status(400).json({ error: 'Tuteur non existant' });
@@ -287,7 +280,6 @@ exports.createTutoringSession = async (req, res, next) => {
     if (!subject) {
       return res.status(400).json({ error: 'Matière non existante' });
     }
-    console.log('subject :', subject);
     // Créer la nouvelle session de tutorat dans la table tutoring_sessions
     const sessionData = {
       tutor_id: tutor_id,
@@ -300,14 +292,12 @@ exports.createTutoringSession = async (req, res, next) => {
     };
     // Créer la session en utilisant le modèle Session
     const newSession = await Session.create(sessionData);
-    console.log('newSession: ', newSession);
 
     return res.status(201).json({
       message: 'Session de tutorat créée avec succès',
       session: newSession,
     });
   } catch (error) {
-    console.error(error);
     return res
       .status(500)
       .json({ error: 'Erreur lors de la création de la session de tutorat' });
@@ -369,7 +359,6 @@ exports.getStudentsBySessionId = async (req, res, next) => {
 
     return res.json(students);
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       error:
         'Erreur lors de la récupération des étudiants inscrits à cette session',
