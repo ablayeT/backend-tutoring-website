@@ -10,6 +10,6 @@ router.get('/tutors', seachCtrl.searchTutors);
 router.get('/student', seachCtrl.searchStudents);
 // Recherche en fonction de la localisation, de la matière et du tuteur
 
-router.get('/sessions/:query', seachCtrl.searchSessions);
+router.get('/sessions', seachCtrl.searchSessions);
 
 module.exports = router;

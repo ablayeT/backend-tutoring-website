@@ -132,6 +132,7 @@ exports.searchStudents = async (req, res, next) => {
 exports.searchSessions = async (req, res) => {
   console.log('seachSessions');
   const { query } = req.params;
+  console.log(query);
 
   try {
     knexQuery = knex('tutoring_sessions').select(
