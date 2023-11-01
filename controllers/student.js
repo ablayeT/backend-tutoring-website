@@ -216,41 +216,6 @@ exports.getStudentSessions = async (req, res, next) => {
   }
 };
 
-// exports.cancelSession = async (req, res, next) => {
-//   try {
-// Récuperatin de l'id de la session de puis le corps de la requête
-//     const sessionId = req.body.sessionId;
-//     console.log('req.body:', req.body);
-
-// Vérifier si la session existe dans la base de données
-//     const session = await knex('student_sessions')
-//       .where('id', sessionId)
-//       .first();
-//     console.log('sessions', session);
-
-//     if (!session) {
-//       return res.status(404).json({ error: 'session introuvable' });
-//     }
-
-// Verifie si la session est déjà annulée
-//     if (session.status === 'canceled') {
-//       return res.status(400).json({ error: 'La session est déjà annulée' });
-//     }
-
-//Metttre à jour la base de donnée pour marquer la session comme annulée :'canceled
-
-//     await knex('student_sessions').where('id', sessionId).delete();
-
-// réponse en cas de succès
-//     return res.status(200).json({ message: 'Session annulée avec succès' });
-//   } catch (error) {
-//     console.error("Erreur lors de l'annulation de la session : ", error);
-//   }
-//   return res
-//     .status(500)
-//     .json({ error: "Erreur lors de l'annulation de la sessionn" });
-// };
-
 exports.cancelReservedSession = async (req, res, next) => {
   try {
     // Récuperatin de l'id de la session de puis le corps de la requête
@@ -287,4 +252,28 @@ exports.cancelReservedSession = async (req, res, next) => {
   return res
     .status(500)
     .json({ error: "Erreur lors de l'annulation de la sessionn" });
+};
+
+exports.getStudentReservedSessions = async (req, res, next) => {
+  const { studentId } = req.params;
+  console.log('studentId : ', studentId);
+  try {
+    const studentSessions = await knex('student_sessions')
+      .select('tutoring_sessions.*')
+      .join(
+        'tutoring_sessions',
+        'student_sessions.tutoring_session_id',
+        '=',
+        'tutoring_sessions.id',
+      )
+      .where('student_sessions.student_id', studentId);
+
+    console.log('studentSessions : ', studentSessions);
+    res.json({ sessions: studentSessions });
+  } catch (err) {
+    console.error('Erreur lors de la récupération de la session');
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération de la session' });
+  }
 };

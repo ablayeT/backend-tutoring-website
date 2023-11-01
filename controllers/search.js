@@ -130,35 +130,54 @@ exports.searchStudents = async (req, res, next) => {
 };
 
 exports.searchSessions = async (req, res) => {
-  console.log('seachSessions');
-  const { query } = req.params;
-  console.log(query);
+  const { query } = req.query;
+  console.log('query in searchSessions:', query);
 
   try {
-    knexQuery = knex('tutoring_sessions').select(
-      'tutoring_sessions.id',
-      'tutoring_sessions.date',
-      'tutoring_sessions.start_time',
-      'tutoring_sessions.end_time',
-      'tutoring_sessions.location',
-      'tutoring_sessions.price',
-      'tutoring_sessions.status',
-      // Ajoutez d'autres colonnes nécessaires ici
-    );
+    let knexQuery = await knex('tutoring_sessions')
+      .select(
+        'tutoring_sessions.id',
+        'tutoring_sessions.date',
+        'tutoring_sessions.start_time',
+        'tutoring_sessions.end_time',
+        'tutoring_sessions.location',
+        'tutoring_sessions.price',
+        'tutoring_sessions.status',
+        'subjects.name as subject_name',
+        'tutor_profiles.imageUrl as tutor_image',
+        'users.first_name as tutor_first_name',
+        'users.last_name as tutor_last_name',
+      )
+      .from('tutoring_sessions')
+      .leftJoin('subjects', 'tutoring_sessions.subject_id', '=', 'subjects.id')
+      .leftJoin(
+        'tutor_profiles',
+        'tutoring_sessions.tutor_id',
+        '=',
+        'tutor_profiles.user_id',
+      )
+      .leftJoin('users', 'tutor_profiles.user_id', '=', 'users.id');
+
+    console.log('knexQuery après les jointures :', knexQuery.toString());
 
     if (query) {
       knexQuery = knexQuery
-        .where('location', 'like', `%${query}%`)
-        .orWhere('subjectName', 'like', `%${query}%`)
-        .orWhere('tutorName', 'like', `%${query}%`);
+        .where('tutoring_sessions.location', 'like', `%${query}%`)
+        .orWhere('subjects.name', 'like', `%${query}%`)
+        .orWhere('users.first_name', 'like', `%${query}%`)
+        .orWhere('users.last_name', 'like', `%${query}%`);
     }
 
+    console.log(
+      'knexQuery avant l’exécution de la requête :',
+      knexQuery.toString(),
+    );
     const sessions = await knexQuery;
     console.log('sessions :', sessions);
 
     res.json({ sessions });
   } catch (error) {
-    console.log('Erreur lors de la recherche :', error);
+    console.log('Erreur lors de la rechercheee :', error);
     res.status(500).json({ error: 'Erreur lors de la recherche.' });
   }
 };

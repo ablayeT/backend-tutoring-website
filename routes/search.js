@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const seachCtrl = require('../controllers/search');
-const { getAllSessions } = require('../controllers/tutor');
+// const { getAllSessions } = require('../controllers/tutor');
 
 // Rechercher des tuteurs en fonction de ses critères
 router.get('/tutors', seachCtrl.searchTutors);
