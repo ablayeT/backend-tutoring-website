@@ -131,10 +131,10 @@ exports.searchStudents = async (req, res, next) => {
 
 exports.searchSessions = async (req, res) => {
   const { query } = req.query;
-  console.log('query in searchSessions:', query);
+  // console.log('query in searchSessions:', query);
 
   try {
-    let knexQuery = await knex('tutoring_sessions')
+    let knexQuery = knex('tutoring_sessions')
       .select(
         'tutoring_sessions.id',
         'tutoring_sessions.date',
@@ -158,7 +158,7 @@ exports.searchSessions = async (req, res) => {
       )
       .leftJoin('users', 'tutor_profiles.user_id', '=', 'users.id');
 
-    console.log('knexQuery après les jointures :', knexQuery.toString());
+    // console.log('knexQuery après les jointures :', knexQuery.toString());
 
     if (query) {
       knexQuery = knexQuery
@@ -168,12 +168,12 @@ exports.searchSessions = async (req, res) => {
         .orWhere('users.last_name', 'like', `%${query}%`);
     }
 
-    console.log(
-      'knexQuery avant l’exécution de la requête :',
-      knexQuery.toString(),
-    );
+    // console.log(
+    //   'knexQuery avant l’exécution de la requête :',
+    //   knexQuery.toString(),
+    // );
     const sessions = await knexQuery;
-    console.log('sessions :', sessions);
+    // console.log('sessions :', sessions);
 
     res.json({ sessions });
   } catch (error) {

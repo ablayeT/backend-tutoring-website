@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const userCRUDCtrl = require('../controllers/userController');
-const multerUpload = require('../middleware/multer.config');
+// const multerUpload = require('../middleware/multer.config');
 const verifyToken = require('../middleware/verifyToken');
 // Route pour récuperer un profil par l'id
 router.get('/profiles/:id', userCRUDCtrl.getOneProfile);
