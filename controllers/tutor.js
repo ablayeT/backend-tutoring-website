@@ -14,7 +14,7 @@ exports.getOneProfile = async (req, res, next) => {
     const profile = await knex('tutor_profiles').where('user_id', id).first();
 
     if (!profile) {
-      return res.status(400).json({ error: 'Profil tuteur non trouvé' });
+      return res.status(401).json({ error: 'Profil tuteur non trouvé' });
     }
 
     return res.json({ profile });
@@ -164,66 +164,6 @@ exports.updateSessionStatus = async (req, res, next) => {
       .json({ error: 'Erreur lors de la mise à jour du statut de la session' });
   }
 };
-
-// exports.getAllSessionsWithStudents = async (req, res, next) => {
-//   try {
-//     const tutorId = req.user.id;
-
-//     const sessionsWithTutors = await knex
-//       .select(
-//         'tutoring_sessions.*',
-//         'tutor_profiles.imageUrl',
-//         'users.first_name as tutor_first_name',
-//         'users.last_name as tutor_last_name',
-//         'subjects.name as subject_name',
-//         'subjects.description as subject_description',
-//       )
-//       .from('tutoring_sessions')
-//       .join(
-//         'tutor_profiles',
-//         'tutoring_sessions.tutor_id',
-//         'tutor_profiles.user_id',
-//       )
-//       .join('users', 'tutoring_sessions.tutor_id', 'users.id')
-//       .join('subjects', 'tutoring_sessions.subject_id', 'subjects.id')
-//       .join('tutoring_sessions.tutor_id', tutorId);
-
-//     const sessionswithStudents = await Promise.all(
-//       sessionsWithTutors.map(async (session) => {
-//         const students = await knex('student_sessions')
-//           .select('users.first_name', 'users.last_name')
-//           .join('users', 'student_sessions.student_id', 'users.id')
-//           .where('student_sessions.tutoring_session_id', session.id);
-
-//         return { ...session, students };
-//       }),
-//     );
-
-//     res.json(sessionsWithTutors);
-//   } catch (error) {
-//     return res.status(500).json({
-//       error:
-//         'Erreur lors de la recuperation des toutes les sessions de tutorat',
-//     });
-//   }
-// };
-
-//  exports.deleteSession  = async (req, res, next) => {
-//     const {id} = req.params;
-
-//     try {
-// Verifier si la session existe dans la base de donnée
-//         const session = await knex('tutoring_sessions').where('id', id).first();
-//         if(!session) {
-//             return res.status(400).json({error: 'Session de mentorat non existante'})
-//         }
-// supprimer la session de mentorat
-//         await knex('tutoring_sessions').where('id', id).del()
-//     }catch (error) {
-//         return res.status(500).json({error: 'Erreur lors de la suppresion de la session de mentorat'})
-//     }
-
-//  }
 
 exports.updateSession = async (req, res, next) => {
   const sessionId = req.params.id;
