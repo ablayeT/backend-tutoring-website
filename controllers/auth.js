@@ -2,61 +2,80 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const knex = require('knex')(require('../knexfile')['development']);
+const { validationResult } = require('express-validator');
+const {
+  signupValidationRules,
+} = require('../middleware/signupValidationRules');
 
 const app = express();
 app.use(express.json());
 
 const token_secret_key = process.env.TOKEN_SECRET_KEY;
 
-exports.signup = async (req, res, next) => {
-  const { first_name, last_name, email, password, user_type } = req.body;
-  try {
-    //verifier si l'utlisateur existe déja& dans la base de donnée
-    const userExist = await knex('users').where('email', email).first();
-    if (userExist) {
-      return res
-        .status(400)
-        .json({ error: 'Un utilisateur avec cette adresse email existe déjà' });
-    }
-    // Hasher le mot de passe avant l'enregistrement dans la base de donnée
-    const hashedPassword = await bcrypt.hash(password, 10);
+exports.signup = [
+  // Validation des entrées
+  signupValidationRules(),
 
-    // enregister le nouvel utilisateur dans la base de données
-    const newUser = await knex('users').insert({
-      first_name,
-      last_name,
-      email,
-      password: hashedPassword,
-      user_type,
-    });
-    res
-      .status(201)
-      .json({ message: 'Utilisateur enregistré avec succés', id: newUser[0] });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Erreur lors de l'enregistrement de l'utilisateur" });
-  }
-  next();
-};
+  async (req, res, next) => {
+    // Vérifier les erreurs de validation
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { first_name, last_name, email, password, user_type } = req.body;
+
+    try {
+      //verifier si l'utlisateur existe déja& dans la base de donnée
+      const userExist = await knex('users').where('email', email).first();
+      if (userExist) {
+        return res.status(400).json({
+          error: 'Un utilisateur avec cette adresse email existe déjà',
+        });
+      }
+      // Hasher le mot de passe avant l'enregistrement dans la base de donnée
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // enregister le nouvel utilisateur dans la base de données
+      const newUser = await knex('users').insert({
+        first_name,
+        last_name,
+        email,
+        password: hashedPassword,
+        user_type,
+      });
+      res.status(201).json({
+        message: 'Utilisateur enregistré avec succés',
+        id: newUser[0],
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement de l'utilisateur:", error);
+      res
+        .status(500)
+        .json({ error: "Erreur lors de l'enregistrement de l'utilisateur" });
+    } finally {
+      next();
+    }
+  },
+];
 
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     // Verifier si l'utilisateur existe dans la base de donnéé
     const user = await knex('users').where('email', email).first();
     if (!user) {
-      return res
-        .status(401)
-        .json({ error: 'Adresse email ou mot de passe incorrect1' });
+      return res.status(401).json({ error: 'Identifiants invalides' });
     }
     // Verifier si le mot de passe est correcte en comparant le hash stocké
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res
-        .status(401)
-        .json({ error: 'Adresse email ou mot de passe incorrecte2' });
+      return res.status(401).json({ error: 'Identifiants invalides' });
     }
 
     // Gérer un jeton d'authenisafication (JWT) pour l'utilisteur

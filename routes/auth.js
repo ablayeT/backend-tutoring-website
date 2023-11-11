@@ -18,15 +18,3 @@ router.get('/current', verifyToken, userAuthCtrl.authCurrent);
 router.post('/logout', userAuthCtrl.logout);
 
 module.exports = router;
-
-// // Route pour créer un nouvel utilisateur
-// router.post('/users', async (req, res) => {
-//     const { name, email, password, type } = req.body;
-
-//     try {
-//       const newUser = await knex('users').insert({ name, email, password, type });
-//       res.status(201).json({ message: 'Utilisateur créé avec succès', id: newUser[0] });
-//     } catch (error) {
-//       res.status(500).json({ error: 'Erreur lors de la création de l\'utilisateur' });
-//     }
-//   });

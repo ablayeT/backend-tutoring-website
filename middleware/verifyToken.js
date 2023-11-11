@@ -1,3 +1,4 @@
+//Middleware d'authentification
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.TOKEN_SECRET_KEY;
 

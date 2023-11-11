@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const keys = {
   client: process.env.CLIENT,
   localhost: process.env.DB_HOST,
@@ -9,12 +10,12 @@ const keys = {
 
 module.exports = {
   development: {
-    client: 'mysql2',
+    client: keys.client,
     connection: {
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'db_tutorat',
+      host: keys.localhost,
+      user: keys.user,
+      password: keys.password,
+      database: keys.database,
     },
     migrations: {
       directory: './migrations',
