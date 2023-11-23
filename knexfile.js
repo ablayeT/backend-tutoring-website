@@ -2,7 +2,8 @@ require('dotenv').config();
 
 const keys = {
   client: process.env.CLIENT,
-  localhost: process.env.DB_HOST,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -11,8 +12,10 @@ const keys = {
 module.exports = {
   development: {
     client: keys.client,
+    version: '8.1',
     connection: {
-      host: keys.localhost,
+      host: keys.host,
+      port: keys.port,
       user: keys.user,
       password: keys.password,
       database: keys.database,

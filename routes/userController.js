@@ -4,6 +4,9 @@ const router = express.Router();
 const userCRUDCtrl = require('../controllers/userController');
 // const multerUpload = require('../middleware/multer.config');
 const verifyToken = require('../middleware/verifyToken');
+// gestion des fichiers
+const multerUpload = require('../middleware/multer.config');
+
 // Route pour récuperer un profil par l'id
 router.get('/profiles/:id', userCRUDCtrl.getOneProfile);
 // Route pour modifier un profile par id et par type de profile
@@ -15,6 +18,12 @@ router.get('/profiles/?userType=student', userCRUDCtrl.getProfiles);
 router.get('/profiles/?userType=tutor', userCRUDCtrl.getProfiles);
 // Route pour créé un profil en fonction du type de profil
 router.post('/profiles/:id', verifyToken, userCRUDCtrl.createProfile);
+// Mettre à jour l'imgage de profile de l'utlisateur
+router.put(
+  '/:userType/:userId/profile-image',
+  multerUpload,
+  userCRUDCtrl.updateUserProfileImage,
+);
 // Route pour laisser une evaluation et un commentaire sur tutor en tant qu'etdiant
 
 // Route pour récupérer les détails d'un utilisateur par son ID

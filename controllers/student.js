@@ -182,7 +182,7 @@ exports.getStudentSessions = async (req, res, next) => {
     // Récupérer les sessions réservées par l'étudiant avec les informations du tuteur
     const studentSessions = await knex('student_sessions')
       .select(
-        'student_sessions.*',
+        'student_sessions.id',
         'users.first_name as first_name',
         'users.last_name as last_name',
         'tutor_profiles.imageUrl as imageUrl',
@@ -201,8 +201,15 @@ exports.getStudentSessions = async (req, res, next) => {
         'tutoring_sessions.tutor_id',
         'tutor_profiles.user_id',
       )
-      .join('subjects', 'tutoring_sessions.subject_id', 'subject_id')
-      .groupByRaw('student_sessions.tutoring_session_id');
+      .join('subjects', 'tutoring_sessions.subject_id', 'subjects.id')
+      .groupBy(
+        'student_sessions.id',
+        'users.first_name',
+        'users.last_name',
+        'tutor_profiles.imageUrl',
+        'subjects.name',
+        'subjects.description',
+      );
 
     res.json(studentSessions);
   } catch (error) {

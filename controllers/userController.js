@@ -220,3 +220,49 @@ exports.createProfile = async (req, res, next) => {
       .json({ error: 'Une erreur est survenue lors de la creation du profil' });
   }
 };
+
+exports.updateUserProfileImage = async (req, res) => {
+  console.log('File Info:', req.file);
+  const { userType, userId } = req.params;
+  console.log('req.params:', req.params);
+  console.log('userType :', userType);
+  console.log('userId :', userId);
+  try {
+    let profileTable;
+
+    // Vérifiez le type d'utilisateur pour déterminer la table à utiliser
+    if (userType === 'Tutor') {
+      profileTable = 'tutor_profiles';
+    } else if (userType === 'Student') {
+      profileTable = 'student_profiles';
+    } else {
+      return res.status(400).json({ error: "Type d'utilisateur non valide" });
+    }
+    console.log('profileTable:', profileTable);
+    // Vérifiez si l'utilisateur existe dans la table correspondante
+    const userExists = await knex(profileTable).where({ id: userId }).first();
+
+    if (!userExists) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    // Ici, vous traiteriez le fichier téléchargé (stocké dans 'req.file') et mettriez à jour l'URL de l'image de profil dans la table appropriée
+    // Supposons que 'req.file.path' contient le chemin de l'image téléchargée
+
+    // Exemple de mise à jour de l'image de profil dans la table spécifique avec Knex.js
+    await knex(profileTable)
+      .where({ id: userId })
+      .update({ imageUrl: req.file.path });
+
+    console.log('req.file.path :', req.file);
+
+    return res
+      .status(200)
+      .json({ message: 'Image de profil mise à jour avec succès' });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'image de profil", error);
+    return res
+      .status(500)
+      .json({ error: "Erreur lors de la mise à jour de l'image de profil" });
+  }
+};
