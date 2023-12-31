@@ -61,6 +61,7 @@ exports.signup = [
 
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
+  console.log('req.body :', req.body);
 
   try {
     const errors = validationResult(req);
@@ -90,6 +91,7 @@ exports.login = async (req, res, next) => {
       token_secret_key,
       { expiresIn: '24h' },
     );
+    console.log('token:', token);
 
     res.json({
       message: 'Connexion réussie',
@@ -100,6 +102,7 @@ exports.login = async (req, res, next) => {
       token,
     });
   } catch (error) {
+    console.log('error :', error);
     res
       .status(500)
       .json({ error: "Erreur lors de la connexion de l'utilsateur" });

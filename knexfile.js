@@ -2,11 +2,11 @@ require('dotenv').config();
 
 const keys = {
   client: process.env.CLIENT,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || '127.0.0.1',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'ablayetoure@2023',
+  database: process.env.DB_NAME || 'db_tutorat',
 };
 
 module.exports = {
@@ -19,6 +19,7 @@ module.exports = {
       user: keys.user,
       password: keys.password,
       database: keys.database,
+      authPlugin: 'mysql_native_password',
     },
     migrations: {
       directory: './migrations',
