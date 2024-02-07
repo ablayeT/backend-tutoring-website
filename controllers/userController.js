@@ -222,11 +222,10 @@ exports.createProfile = async (req, res, next) => {
 };
 
 exports.updateUserProfileImage = async (req, res) => {
-  console.log('File Info:', req.file);
+  // Extraire les données de la requête
+  console.log('req.file:', req.file);
   const { userType, userId } = req.params;
-  console.log('req.params:', req.params);
-  console.log('userType :', userType);
-  console.log('userId :', userId);
+
   try {
     let profileTable;
 
@@ -236,30 +235,36 @@ exports.updateUserProfileImage = async (req, res) => {
     } else if (userType === 'Student') {
       profileTable = 'student_profiles';
     } else {
+      // Si le type d'utilisateur n'est pas valide, retournez une erreur
       return res.status(400).json({ error: "Type d'utilisateur non valide" });
     }
-    console.log('profileTable:', profileTable);
+
     // Vérifiez si l'utilisateur existe dans la table correspondante
-    const userExists = await knex(profileTable).where({ id: userId }).first();
+    const userExists = await knex(profileTable)
+      .where({ user_id: userId })
+      .first();
 
     if (!userExists) {
+      // Si l'utilisateur n'est pas trouvé, retournez une erreur
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
     }
 
-    // Ici, vous traiteriez le fichier téléchargé (stocké dans 'req.file') et mettriez à jour l'URL de l'image de profil dans la table appropriée
-    // Supposons que 'req.file.path' contient le chemin de l'image téléchargée
+    // Mettre à jour l'URL de l'image de profil dans la table appropriée
+    const response = await knex(profileTable)
+      .where({ user_id: userId })
+      .update({ imageUrl: req.file.filename });
 
-    // Exemple de mise à jour de l'image de profil dans la table spécifique avec Knex.js
-    await knex(profileTable)
-      .where({ id: userId })
-      .update({ imageUrl: req.file.path });
-
-    console.log('req.file.path :', req.file);
-
-    return res
-      .status(200)
-      .json({ message: 'Image de profil mise à jour avec succès' });
+    // Répondre avec un message de succès et les détails de la mise à jour
+    return res.status(200).json({
+      message: 'Image de profil mise à jour avec succès',
+      updatedProfile: {
+        userType,
+        userId,
+        imageUrl: req.file.filename,
+      },
+    });
   } catch (error) {
+    // Gérer les erreurs en cas d'échec de la mise à jour
     console.error("Erreur lors de la mise à jour de l'image de profil", error);
     return res
       .status(500)

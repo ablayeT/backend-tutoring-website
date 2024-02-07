@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 
 const userCRUDCtrl = require('../controllers/userController');
 // const multerUpload = require('../middleware/multer.config');
@@ -24,6 +25,7 @@ router.put(
   multerUpload,
   userCRUDCtrl.updateUserProfileImage,
 );
+
 // Route pour laisser une evaluation et un commentaire sur tutor en tant qu'etdiant
 
 // Route pour récupérer les détails d'un utilisateur par son ID
