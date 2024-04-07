@@ -1,5 +1,6 @@
 const express = require('express');
 const knex = require('knex')(require('../knexfile')['development']);
+const moment = require('moment');
 
 const app = express();
 app.use(express.json());
@@ -177,15 +178,20 @@ exports.bookSession = async (req, res, next) => {
 
 // récupérer les sessions réservées par l'étudiant
 exports.getStudentSessions = async (req, res, next) => {
-  const studentId = req.user.id;
+  const studentId = req.user.id; // Assurez-vous que vous avez accès à l'ID de l'étudiant de manière appropriée
+
   try {
-    // Récupérer les sessions réservées par l'étudiant avec les informations du tuteur
     const studentSessions = await knex('student_sessions')
       .select(
         'student_sessions.id',
         'users.first_name as first_name',
         'users.last_name as last_name',
         'tutor_profiles.imageUrl as imageUrl',
+        'tutoring_sessions.date', // Ajout de la colonne date
+        'tutoring_sessions.start_time', // Ajout de la colonne start_time
+        'tutoring_sessions.end_time', // Ajout de la colonne end_time
+        'tutoring_sessions.location', // Ajout de la colonne location
+        'tutoring_sessions.price', // Ajout de la colonne price
         'subjects.name as subject_name',
         'subjects.description as subject_description',
       )
@@ -207,10 +213,20 @@ exports.getStudentSessions = async (req, res, next) => {
         'users.first_name',
         'users.last_name',
         'tutor_profiles.imageUrl',
+        'tutoring_sessions.date',
+        'tutoring_sessions.start_time',
+        'tutoring_sessions.end_time',
+        'tutoring_sessions.location',
+        'tutoring_sessions.price',
         'subjects.name',
         'subjects.description',
       );
 
+    studentSessions.forEach((session) => {
+      session.date = moment(session.date).format('DD/MM/YYYY');
+    });
+
+    console.log('studentSessions: ', studentSessions);
     res.json(studentSessions);
   } catch (error) {
     console.error(
